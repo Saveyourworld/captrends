@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import emailjs from '@emailjs/browser'; // NEW: Imported EmailJS
 
 // --- Global Constants ---
-const BUSINESS_PHONE = "+2349064543927"; // Formatting required for WhatsApp API
-const DISPLAY_PHONE = "0906 454 3927";   // Formatting for user display
+const BUSINESS_PHONE = "+2349064543927"; 
+const DISPLAY_PHONE = "0906 454 3927";   
 
 // --- Mock Data ---
 const PRODUCTS = [
@@ -95,30 +96,25 @@ const ProductCard = ({ product, index, onAddToCart }) => {
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full group animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
-      
       <div className="relative h-48 w-full mb-6 overflow-hidden flex items-center justify-center bg-gray-50 rounded-xl">
         <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-black px-3 py-1.5 rounded-bl-xl z-10 shadow-md">SALE</div>
         <img src={product.image} alt={product.name} className="h-full w-full object-contain group-hover:scale-110 transition-transform duration-500 p-2" />
       </div>
-      
       <h3 className="text-xl font-bold text-gray-900 mb-6 text-center group-hover:text-green-700 transition-colors leading-tight">
         {product.name}
       </h3>
-      
       <div className="mt-auto pt-4 border-t border-gray-100">
         <div className="flex justify-between items-end mb-6">
           <div className="flex flex-col">
             <span className="text-sm text-gray-400 line-through font-medium">₦{product.originalPrice.toLocaleString('en-NG')}</span>
             <span className="text-2xl font-extrabold text-green-700 leading-none">₦{product.price.toLocaleString('en-NG')}</span>
           </div>
-          
           <div className="flex items-center bg-gray-100 rounded-lg p-1">
             <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-8 h-8 rounded bg-white shadow-sm text-gray-600 hover:text-green-700 hover:bg-green-50 font-bold transition-colors">-</button>
             <span className="w-8 text-center font-semibold text-gray-800">{qty}</span>
             <button onClick={() => setQty(qty + 1)} className="w-8 h-8 rounded bg-white shadow-sm text-gray-600 hover:text-green-700 hover:bg-green-50 font-bold transition-colors">+</button>
           </div>
         </div>
-        
         <button onClick={() => onAddToCart(product, qty)} className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex justify-center items-center gap-2 group-hover:bg-orange-500">
           <span>Add to Cart</span>
           <span className="text-xl leading-none transform group-hover:translate-x-2 transition-transform">→</span>
@@ -135,6 +131,9 @@ const HerbalLandingPage = () => {
   const [isFunctionsExpanded, setIsFunctionsExpanded] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', additional: '' });
+  
+  // NEW: State for the newsletter form feedback
+  const [newsletterStatus, setNewsletterStatus] = useState({ loading: false, message: '', type: '' });
 
   // --- Handlers ---
   const handleAddToCart = (product, quantity) => {
@@ -177,13 +176,27 @@ const HerbalLandingPage = () => {
     setCart([]); 
   };
 
+  // NEW: Updated to use EmailJS
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
-    alert("Email captured! Ready for CRM integration.");
-    e.target.reset();
+    setNewsletterStatus({ loading: true, message: 'Subscribing...', type: 'info' });
+
+    emailjs.sendForm(
+      'service_en2f61w',   // 1. REPLACE THIS
+      'template_ryunwli',  // 2. REPLACE THIS
+      e.target,
+      'ZxgXzfvmWUdRBFtBs'    // 3. REPLACE THIS
+    )
+    .then((result) => {
+        setNewsletterStatus({ loading: false, message: 'Welcome to the Jinja family! Check your inbox.', type: 'success' });
+        e.target.reset();
+        setTimeout(() => setNewsletterStatus({ loading: false, message: '', type: '' }), 5000);
+    }, (error) => {
+        setNewsletterStatus({ loading: false, message: 'Oops! Something went wrong. Try again.', type: 'error' });
+        setTimeout(() => setNewsletterStatus({ loading: false, message: '', type: '' }), 5000);
+    });
   };
 
-  // Helper function to navigate sections smoothly
   const scrollToSection = (id) => {
     setIsMobileMenuOpen(false);
     if (view !== 'landing') {
@@ -222,7 +235,6 @@ const HerbalLandingPage = () => {
           </div>
           
           <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8">
-            {/* Cart Summary Panel */}
             <div className="md:w-[45%] bg-gray-50 p-6 rounded-xl border border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Your Cart</h3>
               {cart.length === 0 ? (
@@ -259,20 +271,32 @@ const HerbalLandingPage = () => {
               )}
             </div>
 
-            {/* Checkout Form */}
-            <form onSubmit={handleCheckoutSubmit} className="md:w-[55%] space-y-4">
-              <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Delivery Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium text-gray-700">Full Name *</label><input required type="text" name="name" value={formData.name} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400" /></div>
-                <div><label className="block text-sm font-medium text-gray-700">Phone *</label><input required type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400" /></div>
-              </div>
-              <div><label className="block text-sm font-medium text-gray-700">Email *</label><input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400" /></div>
-              <div><label className="block text-sm font-medium text-gray-700">Address *</label><textarea required name="address" rows="2" value={formData.address} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400"></textarea></div>
-              <div><label className="block text-sm font-medium text-gray-700">Additional Info (optional)</label><textarea name="additional" rows="1" value={formData.additional} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400"></textarea></div>
-              <button disabled={cart.length === 0} type="submit" className={`w-full py-4 px-4 rounded-lg text-white font-bold text-lg transition-all shadow-lg mt-6 ${cart.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600 hover:scale-[1.02] hover:shadow-xl active:scale-95'}`}>
-                {cart.length === 0 ? 'Add Items to Cart' : `Pay ₦${orderTotal.toLocaleString('en-NG')} via WhatsApp`}
-              </button>
-            </form>
+            {/* UPDATED NEWSLETTER FORM WITH NAME */}
+          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row max-w-xl mx-auto gap-2">
+            <input 
+              type="text" 
+              name="name" // <--- EmailJS will look for this!
+              required 
+              placeholder="Your First Name" 
+              className="sm:w-1/3 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 transition-all focus:scale-[1.02]" 
+              disabled={newsletterStatus.loading}
+            />
+            <input 
+              type="email" 
+              name="user_email" // <--- EmailJS will look for this!
+              required 
+              placeholder="Your email address" 
+              className="sm:w-2/3 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 transition-all focus:scale-[1.02]" 
+              disabled={newsletterStatus.loading}
+            />
+            <button 
+              type="submit" 
+              disabled={newsletterStatus.loading}
+              className={`font-bold py-3 px-6 rounded-lg transition-all active:scale-95 whitespace-nowrap ${newsletterStatus.loading ? 'bg-gray-500 text-gray-200 cursor-wait' : 'bg-orange-500 hover:bg-orange-600 text-white hover:shadow-[0_0_15px_rgba(249,115,22,0.5)]'}`}
+            >
+              {newsletterStatus.loading ? 'Sending...' : 'Subscribe'}
+            </button>
+          </form>
           </div>
         </div>
       </div>
@@ -289,45 +313,35 @@ const HerbalLandingPage = () => {
         .delay-300 { animation-delay: 300ms; }
       `}</style>
 
-      {/* HEADER WRAPPER */}
       <header className="fixed w-full z-50 shadow-sm">
-        {/* Top Info Bar (Phone & Socials) */}
         <div className="bg-green-950 text-green-50 py-2 px-4 flex justify-between md:justify-center items-center text-sm md:gap-10">
           <span className="font-bold tracking-wide flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
             {DISPLAY_PHONE}
           </span>
           <div className="flex gap-4">
-            {/* TIKTOK */}
             <a href="https://www.tiktok.com/@captrends_?_r=1&_t=ZS-95I5hmlscnS" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.04-.1z"/></svg>
             </a>
-            {/* INSTAGRAM */}
             <a href="https://www.instagram.com/_captrends?igsh=aWk2Y214MXdxNG1s&utm_source=qr" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
             </a>
           </div>
         </div>
 
-        {/* Main Navigation */}
         <nav className="bg-white/95 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
-              
               <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
                 <span className="text-2xl">🌿</span>
                 <span className="font-extrabold text-green-900 text-xl tracking-tight">JINJA<span className="text-orange-500">.</span></span>
               </div>
-              
-              {/* Desktop Menu */}
               <div className="hidden md:flex space-x-8">
                 <button onClick={() => scrollToSection('discover')} className="text-gray-600 hover:text-green-700 font-semibold transition-colors">Discover</button>
                 <button onClick={() => scrollToSection('products')} className="text-gray-600 hover:text-green-700 font-semibold transition-colors">Products</button>
                 <button onClick={() => scrollToSection('reviews')} className="text-gray-600 hover:text-green-700 font-semibold transition-colors">Reviews</button>
                 <button onClick={() => scrollToSection('community')} className="text-gray-600 hover:text-green-700 font-semibold transition-colors">Community</button>
               </div>
-
-              {/* Mobile Hamburger Button */}
               <div className="md:hidden flex items-center">
                 <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-700 focus:outline-none">
                   <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -339,11 +353,8 @@ const HerbalLandingPage = () => {
                   </svg>
                 </button>
               </div>
-              
             </div>
           </div>
-
-          {/* Mobile Menu Dropdown */}
           {isMobileMenuOpen && (
             <div className="md:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full left-0">
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col">
@@ -357,7 +368,6 @@ const HerbalLandingPage = () => {
         </nav>
       </header>
 
-      {/* Hero Section (Padding adjusted for new dual-header) */}
       <section className="relative bg-green-900 text-white overflow-hidden pt-32 pb-20 md:pt-40 md:pb-24">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col md:flex-row items-center">
@@ -381,22 +391,18 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
-      {/* Central Description Section with "See More" */}
       <section id="discover" className="py-20 bg-green-50 border-b border-green-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center animate-fade-in-up">
           <h2 className="text-3xl md:text-4xl font-extrabold text-green-900 mb-6">Discover the Power of Jinja Herbal Extracts</h2>
           <p className="text-lg text-gray-700 mb-10 leading-relaxed max-w-3xl mx-auto">
             Your Key to Health & Wealth! Introducing Jinja Herbal Extracts, a powerful Nigerian-made herbal supplement crafted from over 70 African roots and herbs. This all-in-one formula is designed to help combat viral, bacterial, fungal infections, and much more. No matter your race or gender, Jinja works with your body to promote overall wellness.
           </p>
-          
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden text-left relative">
             <div className="bg-green-800 px-6 py-5 border-b border-green-900">
               <h3 className="text-white font-bold text-xl text-center">See what JINJA HERBAL EXTRACT is capable of doing 👇</h3>
             </div>
-            
             <div className="p-6 md:p-10 relative">
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                {/* Dynamically display either first 8 or all functions */}
                 {(isFunctionsExpanded ? JINJA_FUNCTIONS : JINJA_FUNCTIONS.slice(0, 8)).map((func, idx) => (
                   <li key={idx} className="flex items-start gap-3 animate-fade-in-up" style={{ animationDelay: `${(idx % 8) * 50}ms` }}>
                     <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-bold text-sm mt-0.5">✓</div>
@@ -404,19 +410,12 @@ const HerbalLandingPage = () => {
                   </li>
                 ))}
               </ul>
-
-              {/* Fog fade effect when collapsed to indicate more content */}
               {!isFunctionsExpanded && (
                 <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
               )}
             </div>
-
-            {/* Toggle Expand Button */}
             <div className="bg-gray-50 p-4 flex justify-center border-t border-gray-100">
-              <button 
-                onClick={() => setIsFunctionsExpanded(!isFunctionsExpanded)} 
-                className="text-green-800 font-bold hover:text-orange-500 transition-colors flex items-center gap-2"
-              >
+              <button onClick={() => setIsFunctionsExpanded(!isFunctionsExpanded)} className="text-green-800 font-bold hover:text-orange-500 transition-colors flex items-center gap-2">
                 {isFunctionsExpanded ? "See Less" : `See All ${JINJA_FUNCTIONS.length} Benefits`}
                 <span className={`transform transition-transform duration-300 ${isFunctionsExpanded ? 'rotate-180' : ''}`}>▼</span>
               </button>
@@ -425,7 +424,6 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
-      {/* Products Section */}
       <section id="products" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in-up">
@@ -444,7 +442,6 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
-      {/* Reviews Section */}
       <section id="reviews" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -464,7 +461,6 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
-      {/* Community Section */}
       <section id="community" className="py-20 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
@@ -485,31 +481,47 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
-      {/* Footer Section with Internal Links */}
       <footer className="bg-green-950 pt-16 pb-8 border-t border-green-800 text-center">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-          
-          {/* Footer Quick Links */}
           <div className="flex flex-wrap justify-center gap-6 md:gap-10 mb-10 border-b border-green-800/50 pb-8">
              <button onClick={() => scrollToSection('discover')} className="text-green-300 hover:text-white transition-colors">Discover</button>
              <button onClick={() => scrollToSection('products')} className="text-green-300 hover:text-white transition-colors">Shop Products</button>
              <button onClick={() => scrollToSection('reviews')} className="text-green-300 hover:text-white transition-colors">Success Stories</button>
              <button onClick={() => scrollToSection('community')} className="text-green-300 hover:text-white transition-colors">Social Feed</button>
           </div>
-
           <h3 className="text-2xl font-bold text-white mb-3">Join the Herbal Revolution</h3>
           <p className="text-green-200 mb-6 text-sm">Get exclusive discounts, health tips, and early access to new products directly to your inbox.</p>
+          
+          {/* UPDATED NEWSLETTER FORM */}
           <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row max-w-md mx-auto gap-2">
-            <input type="email" required placeholder="Your email address" className="flex-grow px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 transition-all focus:scale-[1.02]" />
-            <button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg transition-all hover:shadow-[0_0_15px_rgba(249,115,22,0.5)] active:scale-95 whitespace-nowrap">
-              Subscribe
+            <input 
+              type="email" 
+              name="user_email" // Required for EmailJS matching
+              required 
+              placeholder="Your email address" 
+              className="flex-grow px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 transition-all focus:scale-[1.02]" 
+              disabled={newsletterStatus.loading}
+            />
+            <button 
+              type="submit" 
+              disabled={newsletterStatus.loading}
+              className={`font-bold py-3 px-6 rounded-lg transition-all active:scale-95 whitespace-nowrap ${newsletterStatus.loading ? 'bg-gray-500 text-gray-200 cursor-wait' : 'bg-orange-500 hover:bg-orange-600 text-white hover:shadow-[0_0_15px_rgba(249,115,22,0.5)]'}`}
+            >
+              {newsletterStatus.loading ? 'Sending...' : 'Subscribe'}
             </button>
           </form>
+          
+          {/* Status Message Display */}
+          {newsletterStatus.message && (
+            <div className={`mt-4 text-sm font-bold ${newsletterStatus.type === 'success' ? 'text-green-400' : newsletterStatus.type === 'error' ? 'text-red-400' : 'text-blue-400'}`}>
+              {newsletterStatus.message}
+            </div>
+          )}
+
         </div>
         <p className="text-green-600 text-xs">© 2026 Jinja Herbal Extracts. All rights reserved.</p>
       </footer>
 
-      {/* Floating WhatsApp Widget */}
       <a 
         href={`https://wa.me/${BUSINESS_PHONE.replace('+', '')}?text=${encodeURIComponent("Hello! I need assistance with Jinja Herbal Extracts.")}`} 
         target="_blank" 
@@ -520,7 +532,6 @@ const HerbalLandingPage = () => {
           Need assistance? Chat now
         </div>
         <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-2xl hover:bg-green-600 hover:scale-110 transition-all duration-300 relative">
-          {/* Ping indicator */}
           <span className="absolute top-0 right-0 flex h-4 w-4">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 border-2 border-white"></span>
