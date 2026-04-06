@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import emailjs from '@emailjs/browser'; 
 
 // --- Global Constants ---
-const BUSINESS_PHONE = "+2349064543927"; 
+const BUSINESS_PHONE = "+2349064543927"; // Single WhatsApp Number Maintained
 const DISPLAY_PHONE = "0906 454 3927";   
 
 // --- Mock Data ---
@@ -78,19 +78,18 @@ const JINJA_FUNCTIONS = [
 ];
 
 const REVIEWS = [
-  { id: 1, name: "Sarah L.", text: "I was always weak, dealing with constant infections and low energy. After using Jinja Herbal Extract, my strength came back, my body feels clean, and even my digestion improved. It truly works from inside out!", rating: 5 },
-  { id: 2, name: "Michael B.", text: "I suffered from joint pain and inflammation for months. Within a short time of taking this, the pain reduced drastically and I can move freely again. It feels like my body is healing itself!.", rating: 5 },
-  { id: 3, name: "Jessica R.", text: "I was honestly surprised! Not only is the product effective, but the delivery was super fast. I got mine quicker than expected, started using it immediately, and I’m already seeing results. 100% reliable!", rating: 4 }
+  { id: 1, name: "Bayo M.", text: "I was always weak, dealing with constant infections and low energy. After using Jinja Herbal Extract, my strength came back, my body feels clean, and even my digestion improved. It truly works from inside out!", rating: 5 },
+  { id: 2, name: "Osinachi K.", text: "I suffered from joint pain and inflammation for months. Within a short time of taking this, the pain reduced drastically and I can move freely again. It feels like my body is healing itself!.", rating: 5 },
+  { id: 3, name: "Miriam B.", text: "I was honestly surprised! Not only is the product effective, but the delivery was super fast. I got mine quicker than expected, started using it immediately, and I’m already seeing results. 100% reliable!", rating: 4 }
 ];
 
 const FEED_POSTS = [
-  { id: 1, type: "image", src: "/feed1.jpg" },
-  { id: 2, type: "video", src: "/feed.mp4" }, 
-  { id: 3, type: "image", src: "/feed2.jpg" },
-  { id: 4, type: "image", src: "/feed3.jpg" },
+  { id: 1, type: "video", src: "/feed.mp4" },
+  { id: 2, type: "video", src: "/feed1.mp4" }, 
+  { id: 3, type: "video", src: "/feed2.mp4" },
+  { id: 4, type: "video", src: "/feed3.mp4" },
 ];
 
-// --- Sub-Component: Streamlined Product Card ---
 const ProductCard = ({ product, index, onAddToCart }) => {
   const [qty, setQty] = useState(1);
 
@@ -124,7 +123,6 @@ const ProductCard = ({ product, index, onAddToCart }) => {
   );
 };
 
-// --- Main App Component ---
 const HerbalLandingPage = () => {
   const [cart, setCart] = useState([]);
   const [view, setView] = useState('landing');
@@ -134,7 +132,6 @@ const HerbalLandingPage = () => {
   
   const [newsletterStatus, setNewsletterStatus] = useState({ loading: false, message: '', type: '' });
 
-  // --- Handlers ---
   const handleAddToCart = (product, quantity) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
@@ -160,13 +157,38 @@ const HerbalLandingPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // STRICTLY WHATSAPP CHECKOUT LOGIC
+  // --- MERGED LOGIC: WhatsApp Checkout + EmailJS Order Notification ---
   const handleCheckoutSubmit = (e) => {
     e.preventDefault();
+    
+    // 1. Prepare Data
     const cartItems = cart.map(item => `- ${item.quantity}x ${item.name} (₦${(item.price * item.quantity).toLocaleString('en-NG')})`).join('\n');
     const orderTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const originalTotal = cart.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0);
+    const totalSaved = originalTotal - orderTotal;
     
-    const message = `*NEW HERBAL ORDER* 🌿\n\n*Customer Details:*\nName: ${formData.name}\nPhone: ${formData.phone}\nEmail: ${formData.email}\nAddress: ${formData.address}\nNote: ${formData.additional || 'None'}\n\n*Order Summary:*\n${cartItems}\n\n*Total:* ₦${orderTotal.toLocaleString('en-NG')}\n\nPlease confirm my order!`;
+    // 2. Fire EmailJS silently in the background to peterariole1@gmail.com
+    const templateParams = {
+      customer_name: formData.name,
+      customer_phone: formData.phone,
+      customer_email: formData.email,
+      customer_address: formData.address,
+      customer_note: formData.additional || 'None',
+      order_summary: cartItems,
+      order_total: orderTotal.toLocaleString('en-NG'),
+      total_saved: totalSaved.toLocaleString('en-NG')
+    };
+
+    emailjs.send(
+      'service_en2f61w',         // REPLACE: Your existing Service ID
+      'template_4kax278',  // REPLACE: Your NEW Order Template ID created in Step 1
+      templateParams,
+      'ZxgXzfvmWUdRBFtBs'        // REPLACE: Your existing Public Key
+    ).catch(err => console.error("Email backup failed, but WhatsApp continuing:", err));
+
+    // 3. Format & Open WhatsApp to the single business number
+    const message = `*NEW HERBAL ORDER* 🌿\n\n*Customer Details:*\nName: ${formData.name}\nPhone: ${formData.phone}\nEmail: ${formData.email}\nAddress: ${formData.address}\nNote: ${formData.additional || 'None'}\n\n*Order Summary:*\n${cartItems}\n\n*Total:* ₦${orderTotal.toLocaleString('en-NG')}\n*Total Saved:* ₦${totalSaved.toLocaleString('en-NG')} 🎉\n\nPlease confirm my order!`;
+    
     const whatsappUrl = `https://wa.me/${BUSINESS_PHONE.replace('+', '')}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappUrl, '_blank');
@@ -174,16 +196,16 @@ const HerbalLandingPage = () => {
     setCart([]); 
   };
 
-  // STRICTLY EMAILJS NEWSLETTER LOGIC
+  // --- FOOTER NEWSLETTER LOGIC ---
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
     setNewsletterStatus({ loading: true, message: 'Subscribing...', type: 'info' });
 
     emailjs.sendForm(
-      'service_en2f61w',   // Your Service ID
-      'template_ryunwli',  // Your Template ID
+      'service_en2f61w',   // Existing Service ID
+      'template_ryunwli',  // Existing Newsletter Template ID
       e.target,
-      'ZxgXzfvmWUdRBFtBs'  // Your Public Key
+      'ZxgXzfvmWUdRBFtBs'  // Existing Public Key
     )
     .then((result) => {
         setNewsletterStatus({ loading: false, message: 'Welcome to the Jinja family! Check your inbox.', type: 'success' });
@@ -205,7 +227,6 @@ const HerbalLandingPage = () => {
     }
   };
 
-  // --- Views ---
   if (view === 'success') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-green-50 px-4">
@@ -278,7 +299,8 @@ const HerbalLandingPage = () => {
               <div><label className="block text-sm font-medium text-gray-700">Email *</label><input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400" /></div>
               <div><label className="block text-sm font-medium text-gray-700">Address *</label><textarea required name="address" rows="2" value={formData.address} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400"></textarea></div>
               <div><label className="block text-sm font-medium text-gray-700">Additional Info (optional)</label><textarea name="additional" rows="1" value={formData.additional} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400"></textarea></div>
-              <button disabled={cart.length === 0} type="submit" className={`w-full py-4 px-4 rounded-lg text-white font-bold text-lg transition-all shadow-lg mt-6 ${cart.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600 hover:scale-[1.02] hover:shadow-xl active:scale-95'}`}>
+              
+              <button disabled={cart.length === 0} type="submit" className={`w-full py-4 px-4 mt-6 rounded-lg text-white font-bold text-lg transition-all shadow-lg ${cart.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600 hover:scale-[1.02] hover:shadow-xl active:scale-95'}`}>
                 {cart.length === 0 ? 'Add Items to Cart' : `Pay ₦${orderTotal.toLocaleString('en-NG')} via WhatsApp`}
               </button>
             </form>
@@ -378,10 +400,13 @@ const HerbalLandingPage = () => {
 
       <section id="discover" className="py-20 bg-green-50 border-b border-green-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center animate-fade-in-up">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-green-900 mb-6">Discover the Power of Jinja Herbal Extracts</h2>
-          <p className="text-lg text-gray-700 mb-10 leading-relaxed max-w-3xl mx-auto">
-            Your Key to Health & Wealth! Introducing Jinja Herbal Extracts, a powerful Nigerian-made herbal supplement crafted from over 70 African roots and herbs. This all-in-one formula is designed to help combat viral, bacterial, fungal infections, and much more. No matter your race or gender, Jinja works with your body to promote overall wellness.
-          </p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-green-900 mb-8">Discover the Power of Jinja Herbal Extracts</h2>
+          
+          <div className="max-w-3xl mx-auto mb-10 text-left md:text-justify text-lg text-gray-700 leading-relaxed space-y-4">
+            <p><span className="font-bold text-green-800">Your Key to Health & Wealth!</span> Introducing Jinja Herbal Extracts, a powerful Nigerian-made herbal supplement crafted from over 70 African roots and herbs.</p>
+            <p>This all-in-one formula is designed to help combat viral, bacterial, fungal infections, and much more. No matter your race or gender, Jinja works with your body to promote overall wellness.</p>
+          </div>
+
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden text-left relative">
             <div className="bg-green-800 px-6 py-5 border-b border-green-900">
               <h3 className="text-white font-bold text-xl text-center">See what JINJA HERBAL EXTRACT is capable of doing 👇</h3>
@@ -477,14 +502,21 @@ const HerbalLandingPage = () => {
           <h3 className="text-2xl font-bold text-white mb-3">Join the Herbal Revolution</h3>
           <p className="text-green-200 mb-6 text-sm">Get exclusive discounts, health tips, and early access to new products directly to your inbox.</p>
           
-          {/* UPDATED NEWSLETTER FORM */}
-          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row max-w-md mx-auto gap-2">
+          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row max-w-xl mx-auto gap-2">
+            <input 
+              type="text" 
+              name="name" 
+              required 
+              placeholder="Your First Name" 
+              className="sm:w-1/3 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 transition-all focus:scale-[1.02]" 
+              disabled={newsletterStatus.loading}
+            />
             <input 
               type="email" 
               name="user_email" 
               required 
               placeholder="Your email address" 
-              className="flex-grow px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 transition-all focus:scale-[1.02]" 
+              className="sm:w-2/3 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 transition-all focus:scale-[1.02]" 
               disabled={newsletterStatus.loading}
             />
             <button 
@@ -496,7 +528,6 @@ const HerbalLandingPage = () => {
             </button>
           </form>
           
-          {/* Status Message Display */}
           {newsletterStatus.message && (
             <div className={`mt-4 text-sm font-bold ${newsletterStatus.type === 'success' ? 'text-green-400' : newsletterStatus.type === 'error' ? 'text-red-400' : 'text-blue-400'}`}>
               {newsletterStatus.message}
