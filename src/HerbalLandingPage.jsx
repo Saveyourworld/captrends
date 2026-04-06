@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import emailjs from '@emailjs/browser'; // NEW: Imported EmailJS
+import emailjs from '@emailjs/browser'; 
 
 // --- Global Constants ---
 const BUSINESS_PHONE = "+2349064543927"; 
@@ -132,7 +132,6 @@ const HerbalLandingPage = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', additional: '' });
   
-  // NEW: State for the newsletter form feedback
   const [newsletterStatus, setNewsletterStatus] = useState({ loading: false, message: '', type: '' });
 
   // --- Handlers ---
@@ -161,14 +160,13 @@ const HerbalLandingPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // STRICTLY WHATSAPP CHECKOUT LOGIC
   const handleCheckoutSubmit = (e) => {
     e.preventDefault();
     const cartItems = cart.map(item => `- ${item.quantity}x ${item.name} (₦${(item.price * item.quantity).toLocaleString('en-NG')})`).join('\n');
     const orderTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const originalTotal = cart.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0);
-    const totalSaved = originalTotal - orderTotal;
     
-    const message = `*NEW HERBAL ORDER* 🌿\n\n*Customer Details:*\nName: ${formData.name}\nPhone: ${formData.phone}\nEmail: ${formData.email}\nAddress: ${formData.address}\nNote: ${formData.additional || 'None'}\n\n*Order Summary:*\n${cartItems}\n\n*Total:* ₦${orderTotal.toLocaleString('en-NG')}\n*Total Saved:* ₦${totalSaved.toLocaleString('en-NG')} 🎉\n\nPlease confirm my order!`;
+    const message = `*NEW HERBAL ORDER* 🌿\n\n*Customer Details:*\nName: ${formData.name}\nPhone: ${formData.phone}\nEmail: ${formData.email}\nAddress: ${formData.address}\nNote: ${formData.additional || 'None'}\n\n*Order Summary:*\n${cartItems}\n\n*Total:* ₦${orderTotal.toLocaleString('en-NG')}\n\nPlease confirm my order!`;
     const whatsappUrl = `https://wa.me/${BUSINESS_PHONE.replace('+', '')}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappUrl, '_blank');
@@ -176,16 +174,16 @@ const HerbalLandingPage = () => {
     setCart([]); 
   };
 
-  // NEW: Updated to use EmailJS
+  // STRICTLY EMAILJS NEWSLETTER LOGIC
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
     setNewsletterStatus({ loading: true, message: 'Subscribing...', type: 'info' });
 
     emailjs.sendForm(
-      'service_en2f61w',   // 1. REPLACE THIS
-      'template_ryunwli',  // 2. REPLACE THIS
+      'service_en2f61w',   // Your Service ID
+      'template_ryunwli',  // Your Template ID
       e.target,
-      'ZxgXzfvmWUdRBFtBs'    // 3. REPLACE THIS
+      'ZxgXzfvmWUdRBFtBs'  // Your Public Key
     )
     .then((result) => {
         setNewsletterStatus({ loading: false, message: 'Welcome to the Jinja family! Check your inbox.', type: 'success' });
@@ -271,32 +269,19 @@ const HerbalLandingPage = () => {
               )}
             </div>
 
-            {/* UPDATED NEWSLETTER FORM WITH NAME */}
-          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row max-w-xl mx-auto gap-2">
-            <input 
-              type="text" 
-              name="name" // <--- EmailJS will look for this!
-              required 
-              placeholder="Your First Name" 
-              className="sm:w-1/3 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 transition-all focus:scale-[1.02]" 
-              disabled={newsletterStatus.loading}
-            />
-            <input 
-              type="email" 
-              name="user_email" // <--- EmailJS will look for this!
-              required 
-              placeholder="Your email address" 
-              className="sm:w-2/3 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 transition-all focus:scale-[1.02]" 
-              disabled={newsletterStatus.loading}
-            />
-            <button 
-              type="submit" 
-              disabled={newsletterStatus.loading}
-              className={`font-bold py-3 px-6 rounded-lg transition-all active:scale-95 whitespace-nowrap ${newsletterStatus.loading ? 'bg-gray-500 text-gray-200 cursor-wait' : 'bg-orange-500 hover:bg-orange-600 text-white hover:shadow-[0_0_15px_rgba(249,115,22,0.5)]'}`}
-            >
-              {newsletterStatus.loading ? 'Sending...' : 'Subscribe'}
-            </button>
-          </form>
+            <form onSubmit={handleCheckoutSubmit} className="md:w-[55%] space-y-4">
+              <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Delivery Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><label className="block text-sm font-medium text-gray-700">Full Name *</label><input required type="text" name="name" value={formData.name} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400" /></div>
+                <div><label className="block text-sm font-medium text-gray-700">Phone *</label><input required type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400" /></div>
+              </div>
+              <div><label className="block text-sm font-medium text-gray-700">Email *</label><input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400" /></div>
+              <div><label className="block text-sm font-medium text-gray-700">Address *</label><textarea required name="address" rows="2" value={formData.address} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400"></textarea></div>
+              <div><label className="block text-sm font-medium text-gray-700">Additional Info (optional)</label><textarea name="additional" rows="1" value={formData.additional} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 p-2 border transition-all hover:border-green-400"></textarea></div>
+              <button disabled={cart.length === 0} type="submit" className={`w-full py-4 px-4 rounded-lg text-white font-bold text-lg transition-all shadow-lg mt-6 ${cart.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600 hover:scale-[1.02] hover:shadow-xl active:scale-95'}`}>
+                {cart.length === 0 ? 'Add Items to Cart' : `Pay ₦${orderTotal.toLocaleString('en-NG')} via WhatsApp`}
+              </button>
+            </form>
           </div>
         </div>
       </div>
@@ -496,7 +481,7 @@ const HerbalLandingPage = () => {
           <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row max-w-md mx-auto gap-2">
             <input 
               type="email" 
-              name="user_email" // Required for EmailJS matching
+              name="user_email" 
               required 
               placeholder="Your email address" 
               className="flex-grow px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 transition-all focus:scale-[1.02]" 
