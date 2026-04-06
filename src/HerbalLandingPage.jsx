@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser'; 
 
 // --- Global Constants ---
-const BUSINESS_PHONE = "+2349064543927"; // Single WhatsApp Number Maintained
+const BUSINESS_PHONE = "+2349064543927"; 
 const DISPLAY_PHONE = "0906 454 3927";   
 
 // --- Mock Data ---
@@ -90,6 +90,48 @@ const FEED_POSTS = [
   { id: 4, type: "video", src: "/feed3.mp4" },
 ];
 
+// --- NEW SUB-COMPONENT: Lazy Video Loader for Performance ---
+const LazyVideo = ({ src }) => {
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const placeholderRef = useRef(null);
+
+  useEffect(() => {
+    // Only load the video when it gets close to the screen
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setShouldLoad(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: "300px" });
+
+    if (placeholderRef.current) {
+      observer.observe(placeholderRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={placeholderRef} className="w-full h-full relative bg-gray-800">
+      {shouldLoad ? (
+        <video 
+          src={src} 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          preload="metadata"
+          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 animate-fade-in-up" 
+        />
+      ) : (
+        // Displays a pulsing loading state until the user scrolls down
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ProductCard = ({ product, index, onAddToCart }) => {
   const [qty, setQty] = useState(1);
 
@@ -167,7 +209,7 @@ const HerbalLandingPage = () => {
     const originalTotal = cart.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0);
     const totalSaved = originalTotal - orderTotal;
     
-    // 2. Fire EmailJS silently in the background to peterariole1@gmail.com
+    // 2. Fire EmailJS silently in the background
     const templateParams = {
       customer_name: formData.name,
       customer_phone: formData.phone,
@@ -180,10 +222,10 @@ const HerbalLandingPage = () => {
     };
 
     emailjs.send(
-      'service_en2f61w',         // REPLACE: Your existing Service ID
-      'template_4kax278',  // REPLACE: Your NEW Order Template ID created in Step 1
+      'service_en2f61w',         
+      'template_4kax278',  
       templateParams,
-      'ZxgXzfvmWUdRBFtBs'        // REPLACE: Your existing Public Key
+      'ZxgXzfvmWUdRBFtBs'        
     ).catch(err => console.error("Email backup failed, but WhatsApp continuing:", err));
 
     // 3. Format & Open WhatsApp to the single business number
@@ -202,10 +244,10 @@ const HerbalLandingPage = () => {
     setNewsletterStatus({ loading: true, message: 'Subscribing...', type: 'info' });
 
     emailjs.sendForm(
-      'service_en2f61w',   // Existing Service ID
-      'template_ryunwli',  // Existing Newsletter Template ID
+      'service_en2f61w',   
+      'template_ryunwli',  
       e.target,
-      'ZxgXzfvmWUdRBFtBs'  // Existing Public Key
+      'ZxgXzfvmWUdRBFtBs'  
     )
     .then((result) => {
         setNewsletterStatus({ loading: false, message: 'Welcome to the Jinja family! Check your inbox.', type: 'success' });
@@ -392,7 +434,7 @@ const HerbalLandingPage = () => {
           </div>
           <div className="md:w-1/2 mt-12 md:mt-0 w-full animate-fade-in-up delay-200">
             <div className="aspect-w-16 aspect-h-9 bg-black rounded-2xl shadow-2xl overflow-hidden border-4 border-green-700 relative flex items-center justify-center h-64 md:h-96 transform transition-transform duration-700 hover:scale-[1.03]">
-              <video src="/test.MP4" controls muted autoPlay loop playsInline className="w-full h-full object-cover absolute inset-0"></video>
+              <video src="/test.mp4" controls muted autoPlay loop playsInline preload="metadata" className="w-full h-full object-cover absolute inset-0"></video>
             </div>
           </div>
         </div>
@@ -480,11 +522,8 @@ const HerbalLandingPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {FEED_POSTS.map(post => (
               <div key={post.id} className="relative aspect-square rounded-xl overflow-hidden group cursor-pointer border border-gray-700 bg-black">
-                {post.type === 'video' ? (
-                  <video src={post.src} autoPlay loop muted playsInline className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-                ) : (
-                  <img src={post.src} alt="Feed content" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" />
-                )}
+                 {/* Replaced standard video tags with the LazyVideo component */}
+                 <LazyVideo src={post.src} />
               </div>
             ))}
           </div>
