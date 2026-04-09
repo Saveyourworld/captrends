@@ -83,6 +83,12 @@ const REVIEWS = [
   { id: 3, name: "Miriam B.", text: "I was honestly surprised! Not only is the product effective, but the delivery was super fast. I got mine quicker than expected, started using it immediately, and I’m already seeing results. 100% reliable!", rating: 4 }
 ];
 
+// NEW: Testimonies Image Array (Add these to your public folder)
+const TESTIMONY_IMAGES = [
+  "/testi1.jpg", "/testi2.jpg", "/testi3.jpg", "/test4.jpg",
+  "/test5.JPG", "/test6.JPG", "/test7.JPG", "/test8.JPG"
+];
+
 const FEED_POSTS = [
   { id: 1, type: "video", src: "/feed.mp4" },
   { id: 2, type: "video", src: "/feed1.mp4" }, 
@@ -90,13 +96,12 @@ const FEED_POSTS = [
   { id: 4, type: "video", src: "/feed3.mp4" },
 ];
 
-// --- NEW SUB-COMPONENT: Lazy Video Loader for Performance ---
+// --- Sub-Component: Lazy Video Loader for Performance ---
 const LazyVideo = ({ src }) => {
   const [shouldLoad, setShouldLoad] = useState(false);
   const placeholderRef = useRef(null);
 
   useEffect(() => {
-    // Only load the video when it gets close to the screen
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
         setShouldLoad(true);
@@ -123,7 +128,6 @@ const LazyVideo = ({ src }) => {
           className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 animate-fade-in-up" 
         />
       ) : (
-        // Displays a pulsing loading state until the user scrolls down
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
@@ -199,17 +203,14 @@ const HerbalLandingPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // --- MERGED LOGIC: WhatsApp Checkout + EmailJS Order Notification ---
   const handleCheckoutSubmit = (e) => {
     e.preventDefault();
     
-    // 1. Prepare Data
     const cartItems = cart.map(item => `- ${item.quantity}x ${item.name} (₦${(item.price * item.quantity).toLocaleString('en-NG')})`).join('\n');
     const orderTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const originalTotal = cart.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0);
     const totalSaved = originalTotal - orderTotal;
     
-    // 2. Fire EmailJS silently in the background
     const templateParams = {
       customer_name: formData.name,
       customer_phone: formData.phone,
@@ -228,7 +229,6 @@ const HerbalLandingPage = () => {
       'ZxgXzfvmWUdRBFtBs'        
     ).catch(err => console.error("Email backup failed, but WhatsApp continuing:", err));
 
-    // 3. Format & Open WhatsApp to the single business number
     const message = `*NEW HERBAL ORDER* 🌿\n\n*Customer Details:*\nName: ${formData.name}\nPhone: ${formData.phone}\nEmail: ${formData.email}\nAddress: ${formData.address}\nNote: ${formData.additional || 'None'}\n\n*Order Summary:*\n${cartItems}\n\n*Total:* ₦${orderTotal.toLocaleString('en-NG')}\n*Total Saved:* ₦${totalSaved.toLocaleString('en-NG')} 🎉\n\nPlease confirm my order!`;
     
     const whatsappUrl = `https://wa.me/${BUSINESS_PHONE.replace('+', '')}?text=${encodeURIComponent(message)}`;
@@ -238,7 +238,6 @@ const HerbalLandingPage = () => {
     setCart([]); 
   };
 
-  // --- FOOTER NEWSLETTER LOGIC ---
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
     setNewsletterStatus({ loading: true, message: 'Subscribing...', type: 'info' });
@@ -417,7 +416,8 @@ const HerbalLandingPage = () => {
         </nav>
       </header>
 
-      <section className="relative bg-green-900 text-white overflow-hidden pt-32 pb-20 md:pt-40 md:pb-24">
+      {/* Hero Section */}
+      <section className="relative bg-green-900 text-white overflow-hidden pt-32 pb-32 md:pt-40 md:pb-40">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 md:pr-12 text-center md:text-left mt-8 md:mt-0">
@@ -434,12 +434,44 @@ const HerbalLandingPage = () => {
           </div>
           <div className="md:w-1/2 mt-12 md:mt-0 w-full animate-fade-in-up delay-200">
             <div className="aspect-w-16 aspect-h-9 bg-black rounded-2xl shadow-2xl overflow-hidden border-4 border-green-700 relative flex items-center justify-center h-64 md:h-96 transform transition-transform duration-700 hover:scale-[1.03]">
-              <video src="/test.mp4" controls muted autoPlay loop playsInline preload="metadata" className="w-full h-full object-cover absolute inset-0"></video>
+              <video src="/test.mp4" controls muted autoPlay loop playsInline className="w-full h-full object-cover absolute inset-0"></video>
             </div>
           </div>
         </div>
       </section>
 
+      {/* NEW: Floating "Objection Buster" Trust Box */}
+      <section className="relative z-20 -mt-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up delay-300">
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-t-4 border-orange-500">
+          <div className="bg-green-50 px-6 py-4 border-b border-green-100 text-center">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-green-900">Why Wait? Start Healing Today.</h2>
+          </div>
+          <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center text-2xl mb-4">⏳</div>
+              <h3 className="font-bold text-gray-900 mb-2">Fast Results</h3>
+              <p className="text-gray-600 text-sm">Feel the difference in just <strong>2 weeks</strong> of consistent use. Don't let your pain linger.</p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl mb-4">🚚</div>
+              <h3 className="font-bold text-gray-900 mb-2">Nationwide Delivery</h3>
+              <p className="text-gray-600 text-sm">We deliver straight to your doorstep anywhere in Nigeria within <strong>2-3 days</strong>.</p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center text-2xl mb-4">🛡️</div>
+              <h3 className="font-bold text-gray-900 mb-2">Money-Back Guarantee</h3>
+              <p className="text-gray-600 text-sm">If you don't see results within 2 weeks, request a refund. <strong>No questions asked.</strong></p>
+            </div>
+          </div>
+          <div className="bg-red-50 p-6 border-t border-red-100">
+            <p className="text-center text-red-800 font-medium">
+              ⚠️ <span className="font-bold">The Cost of Waiting:</span> Health is wealth. Carrying severe pains and diseases you can't talk about will keep you trapped in a low-quality life. Don't wait until it is too late—take action today.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Discover Section */}
       <section id="discover" className="py-20 bg-green-50 border-b border-green-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center animate-fade-in-up">
           <h2 className="text-3xl md:text-4xl font-extrabold text-green-900 mb-8">Discover the Power of Jinja Herbal Extracts</h2>
@@ -476,6 +508,7 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
+      {/* Products Section */}
       <section id="products" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in-up">
@@ -494,6 +527,7 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
+      {/* Reviews Section */}
       <section id="reviews" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -513,6 +547,37 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
+      {/* NEW: Testimonies Image Grid Section */}
+      <section id="testimonies" className="py-20 bg-green-50 border-t border-green-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-extrabold text-green-900 mb-4">Seeing is Believing</h2>
+            <p className="text-gray-600 text-lg">Real results from people who decided to take their health back.</p>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {TESTIMONY_IMAGES.map((imgSrc, index) => (
+              <div key={index} className="relative aspect-square overflow-hidden rounded-xl shadow-md group border border-gray-200 bg-white">
+                <img 
+                  src={imgSrc} 
+                  alt={`Customer Testimony ${index + 1}`} 
+                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                />
+                {/* Optional overlay effect for polish */}
+                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-12 text-center">
+            <button onClick={() => scrollToSection('products')} className="bg-green-700 hover:bg-green-800 text-white font-bold py-4 px-10 rounded-full shadow-lg transition-all hover:scale-105">
+              Start Your Healing Journey
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Community Section */}
       <section id="community" className="py-20 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
@@ -522,7 +587,6 @@ const HerbalLandingPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {FEED_POSTS.map(post => (
               <div key={post.id} className="relative aspect-square rounded-xl overflow-hidden group cursor-pointer border border-gray-700 bg-black">
-                 {/* Replaced standard video tags with the LazyVideo component */}
                  <LazyVideo src={post.src} />
               </div>
             ))}
@@ -530,6 +594,7 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
+      {/* Footer Section */}
       <footer className="bg-green-950 pt-16 pb-8 border-t border-green-800 text-center">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
           <div className="flex flex-wrap justify-center gap-6 md:gap-10 mb-10 border-b border-green-800/50 pb-8">
@@ -577,6 +642,7 @@ const HerbalLandingPage = () => {
         <p className="text-green-600 text-xs">© 2026 Jinja Herbal Extracts. All rights reserved.</p>
       </footer>
 
+      {/* Floating WhatsApp Widget */}
       <a 
         href={`https://wa.me/${BUSINESS_PHONE.replace('+', '')}?text=${encodeURIComponent("Hello! I need assistance with Jinja Herbal Extracts.")}`} 
         target="_blank" 
