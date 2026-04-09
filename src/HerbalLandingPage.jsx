@@ -387,7 +387,7 @@ const HerbalLandingPage = () => {
                   <span className="font-extrabold text-green-900 text-2xl tracking-tight leading-none">JINJA<span className="text-orange-500">.</span></span>
                 </div>
                 <span className="text-[0.65rem] font-bold text-gray-500 tracking-widest uppercase mt-1 pl-8">
-                  Distributed by <span className="text-orange-500">Captrends</span>
+                  Distributed by <span className="text-orange-500">CaptrendsNG</span>
                 </span>
               </div>
 
