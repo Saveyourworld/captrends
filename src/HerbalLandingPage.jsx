@@ -83,7 +83,6 @@ const REVIEWS = [
   { id: 3, name: "Miriam B.", text: "I was honestly surprised! Not only is the product effective, but the delivery was super fast. I got mine quicker than expected, started using it immediately, and I’m already seeing results. 100% reliable!", rating: 4 }
 ];
 
-// NEW: Testimonies Image Array (Add these to your public folder)
 const TESTIMONY_IMAGES = [
   "/testi1.jpg", "/testi2.jpg", "/testi3.jpg", "/test4.jpg",
   "/test5.JPG", "/test6.JPG", "/test7.JPG", "/test8.JPG"
@@ -380,10 +379,18 @@ const HerbalLandingPage = () => {
         <nav className="bg-white/95 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
-              <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-                <span className="text-2xl">🌿</span>
-                <span className="font-extrabold text-green-900 text-xl tracking-tight">JINJA<span className="text-orange-500">.</span></span>
+              
+              {/* UPDATED LOGO SECTION */}
+              <div className="flex-shrink-0 flex flex-col justify-center cursor-pointer pt-1" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-2xl leading-none">🌿</span>
+                  <span className="font-extrabold text-green-900 text-2xl tracking-tight leading-none">JINJA<span className="text-orange-500">.</span></span>
+                </div>
+                <span className="text-[0.65rem] font-bold text-gray-500 tracking-widest uppercase mt-1 pl-8">
+                  Distributed by <span className="text-orange-500">Captrends</span>
+                </span>
               </div>
+
               <div className="hidden md:flex space-x-8">
                 <button onClick={() => scrollToSection('discover')} className="text-gray-600 hover:text-green-700 font-semibold transition-colors">Discover</button>
                 <button onClick={() => scrollToSection('products')} className="text-gray-600 hover:text-green-700 font-semibold transition-colors">Products</button>
@@ -416,7 +423,6 @@ const HerbalLandingPage = () => {
         </nav>
       </header>
 
-      {/* Hero Section */}
       <section className="relative bg-green-900 text-white overflow-hidden pt-32 pb-32 md:pt-40 md:pb-40">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col md:flex-row items-center">
@@ -434,13 +440,12 @@ const HerbalLandingPage = () => {
           </div>
           <div className="md:w-1/2 mt-12 md:mt-0 w-full animate-fade-in-up delay-200">
             <div className="aspect-w-16 aspect-h-9 bg-black rounded-2xl shadow-2xl overflow-hidden border-4 border-green-700 relative flex items-center justify-center h-64 md:h-96 transform transition-transform duration-700 hover:scale-[1.03]">
-              <video src="/test.mp4" controls muted autoPlay loop playsInline className="w-full h-full object-cover absolute inset-0"></video>
+              <video src="/test.mp4" controls muted autoPlay loop playsInline preload="metadata" className="w-full h-full object-cover absolute inset-0"></video>
             </div>
           </div>
         </div>
       </section>
 
-      {/* NEW: Floating "Objection Buster" Trust Box */}
       <section className="relative z-20 -mt-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up delay-300">
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-t-4 border-orange-500">
           <div className="bg-green-50 px-6 py-4 border-b border-green-100 text-center">
@@ -471,7 +476,6 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
-      {/* Discover Section */}
       <section id="discover" className="py-20 bg-green-50 border-b border-green-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center animate-fade-in-up">
           <h2 className="text-3xl md:text-4xl font-extrabold text-green-900 mb-8">Discover the Power of Jinja Herbal Extracts</h2>
@@ -508,7 +512,6 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
-      {/* Products Section */}
       <section id="products" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in-up">
@@ -527,7 +530,6 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
-      {/* Reviews Section */}
       <section id="reviews" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -547,7 +549,6 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
-      {/* NEW: Testimonies Image Grid Section */}
       <section id="testimonies" className="py-20 bg-green-50 border-t border-green-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -563,7 +564,6 @@ const HerbalLandingPage = () => {
                   alt={`Customer Testimony ${index + 1}`} 
                   className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                 />
-                {/* Optional overlay effect for polish */}
                 <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
               </div>
             ))}
@@ -577,7 +577,6 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
-      {/* Community Section */}
       <section id="community" className="py-20 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
@@ -594,7 +593,6 @@ const HerbalLandingPage = () => {
         </div>
       </section>
 
-      {/* Footer Section */}
       <footer className="bg-green-950 pt-16 pb-8 border-t border-green-800 text-center">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
           <div className="flex flex-wrap justify-center gap-6 md:gap-10 mb-10 border-b border-green-800/50 pb-8">
@@ -642,7 +640,6 @@ const HerbalLandingPage = () => {
         <p className="text-green-600 text-xs">© 2026 Jinja Herbal Extracts. All rights reserved.</p>
       </footer>
 
-      {/* Floating WhatsApp Widget */}
       <a 
         href={`https://wa.me/${BUSINESS_PHONE.replace('+', '')}?text=${encodeURIComponent("Hello! I need assistance with Jinja Herbal Extracts.")}`} 
         target="_blank" 
