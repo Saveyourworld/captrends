@@ -1,0 +1,227 @@
+
+/* ========================================
+   9-IN-1 ELECTRIC CLEANING BRUSH
+   GLOBAL LANDING PAGE ENHANCEMENTS
+======================================== */
+
+:root {
+  --brand-navy: #101a35;
+  --brand-navy-dark: #0b142b;
+  --brand-gold: #d5a51e;
+  --brand-blue: #0284c7;
+  --brand-green: #15803d;
+  --page-background: #fffcf4;
+
+  /* Fixed top countdown bar */
+  --sticky-top-offset: 110px;
+
+  /* Fixed mobile purchase bar */
+  --sticky-bottom-offset: 96px;
+}
+
+/* ========================================
+   GLOBAL DOCUMENT
+======================================== */
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--sticky-top-offset);
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ========================================
+   MEDIA
+======================================== */
+
+img,
+video {
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+video {
+  display: block;
+}
+
+/* ========================================
+   INTERACTIVE ELEMENTS
+======================================== */
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Keyboard navigation */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--brand-gold);
+  outline-offset: 3px;
+}
+
+/* ========================================
+   SCROLL TARGETS
+======================================== */
+
+#main-content,
+#order-form,
+#customer-reviews,
+#product-benefits,
+#product-gallery,
+#product-demonstration {
+  scroll-margin-top: var(--sticky-top-offset);
+}
+
+/* ========================================
+   CHECKOUT FORM
+======================================== */
+
+#order-form input,
+#order-form textarea,
+#order-form select {
+  font: inherit;
+  color: var(--brand-navy);
+}
+
+#order-form input::placeholder,
+#order-form textarea::placeholder {
+  color: #94a3b8;
+}
+
+#order-form input:focus,
+#order-form textarea:focus,
+#order-form select:focus {
+  background-color: #ffffff;
+}
+
+/* ========================================
+   PRODUCT MEDIA
+======================================== */
+
+#product-gallery img,
+#product-demonstration img {
+  max-width: 100%;
+}
+
+#product-demonstration video {
+  width: 100%;
+}
+
+/* ========================================
+   CUSTOMER REVIEWS
+======================================== */
+
+#customer-reviews article {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+@media (hover: hover) {
+  #customer-reviews article:hover {
+    border-color: #cbd5e1;
+  }
+}
+
+/* Horizontal review scrolling */
+#customer-reviews [aria-label="Customer review and product photo gallery"] {
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ========================================
+   TEXT HANDLING
+======================================== */
+
+h1,
+h2,
+h3,
+h4,
+p {
+  overflow-wrap: break-word;
+}
+
+/* ========================================
+   MOBILE RESPONSIVENESS
+======================================== */
+
+@media (max-width: 1023px) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  #order-form {
+    scroll-margin-bottom: var(--sticky-bottom-offset);
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --sticky-top-offset: 104px;
+    --sticky-bottom-offset: 100px;
+  }
+
+  /* Prevent iOS auto-zoom on form focus */
+  #order-form input,
+  #order-form textarea,
+  #order-form select {
+    font-size: 16px;
+  }
+
+  /* Improve horizontal gallery swiping */
+  #customer-reviews [aria-label="Customer review and product photo gallery"] {
+    scroll-snap-type: x mandatory;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
