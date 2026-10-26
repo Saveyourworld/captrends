@@ -1,1 +1,18 @@
 @import "tailwindcss";
+/* Electric Scrubber design tokens */
+@theme {
+  /* BRAND COLORS */
+  --color-brand-primary: #101a35;
+  --color-brand-accent: #d5a51e;
+  --color-brand-blue: #0284c7;
+  --color-brand-success: #15803d;
+  --color-brand-cream: #fffcf4;
+
+  /* TYPOGRAPHY */
+  --font-heading: "Outfit", sans-serif;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+
+  /* CUSTOM DESIGN TOKENS */
+  --spacing-128: 32rem;
+  --radius-super: 2rem;
+}
