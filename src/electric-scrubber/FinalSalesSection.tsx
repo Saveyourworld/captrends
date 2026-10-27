@@ -3,8 +3,8 @@ import type { TransitionEvent } from 'react';
 
 type Tier = 'regular' | 'silver' | 'gold';
 type Offer = { id: Tier; name: string; qty: number; price: number; original: number; pitch: string; giftNames: string[]; photos: string[]; color: string };
-const IMG = '/free-gifts/';
-const REVIEW_IMG = '/final-review-images/';
+const IMG = '/electric-scrubber/free-gifts/';
+const REVIEW_IMG = '/electric-scrubber/final-review-images/';
 const offers: Offer[] = [
   { id:'regular',name:'REGULAR',qty:1,price:43000,original:70000,color:'border-slate-300',pitch:'Your first step towards easier cleaning. Get one 9-in-1 Electric Spin Scrubber plus a pair of cleaning gloves, at no extra cost. Everything you need to stop scrubbing the hard way.',giftNames:['1 Electric Spin Scrubber','FREE Cleaning Gloves'],photos:[IMG+'scrubber.jpeg',IMG+'gloves.jpeg'] },
   { id:'silver',name:'SILVER',qty:2,price:84000,original:140000,color:'border-sky-500',pitch:'Double the cleaning power and share the convenience. Keep one for yourself and give the second to someone who deserves a break. You also get free gloves and an additional washing brush.',giftNames:['2 Electric Spin Scrubbers','FREE Cleaning Gloves','FREE Washing Brush'],photos:[IMG+'scrubber.jpeg',IMG+'gloves.jpeg',IMG+'washer.jpeg'] },
