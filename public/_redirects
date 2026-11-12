@@ -1,1 +1,4 @@
-/*    /index.html   200
+/corefootwears       /corefootwears/             301
+/corefootwears/*     /corefootwears/index.html   200
+/*                   /index.html                 200
+
