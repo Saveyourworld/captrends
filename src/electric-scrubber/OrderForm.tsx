@@ -318,7 +318,9 @@ export default function OrderForm() {
     setCheckoutStatus("idle");
 
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const templateId =
+    import.meta.env.VITE_EMAILJS_TEMPLATE_ID ||
+    import.meta.env.VITE_EMAILJS_ORDER_TEMPLATE_ID;
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
     let emailSucceeded = false;
